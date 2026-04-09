@@ -27,13 +27,13 @@ export class WorkspaceScanner {
     for (const slug of slugs) {
       const decoded = this.decodeSlug(slug)
       if (!decoded) continue
-      const exists = fs.existsSync(decoded)
+      if (!fs.existsSync(decoded)) continue
       workspaces.push({
         id: slug,
         path: decoded,
         name: path.basename(decoded),
         isGlobal: false,
-        exists,
+        exists: true,
       })
     }
 
