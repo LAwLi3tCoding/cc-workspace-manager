@@ -116,8 +116,7 @@ export default function App() {
                   name={mcp.name}
                   description={`${mcp.command} ${mcp.args.join(' ')}`}
                   effective={mcp.effective}
-                  disabled={mcp.overrideByEnableAll}
-                  disabledReason={mcp.overrideByEnableAll ? 'enableAllProjectMcpServers=true，所有 server 强制启用' : undefined}
+                  disabledReason={mcp.overrideByEnableAll ? '全局开启了 enableAllProjectMcpServers，禁用将写入黑名单覆盖' : undefined}
                   onToggle={enabled =>
                     api.setMcpEnabled(selectedId!, mcp.name, enabled)
                       .then(() => loadTabData(selectedId!, 'mcps'))
