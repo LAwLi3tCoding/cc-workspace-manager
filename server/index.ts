@@ -6,6 +6,7 @@ import workspacesRouter from './routes/workspaces'
 import skillsRouter from './routes/skills'
 import mcpsRouter from './routes/mcps'
 import pluginsRouter from './routes/plugins'
+import hooksRouter from './routes/hooks'
 
 const app = express()
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 7890
@@ -18,6 +19,7 @@ app.use('/api/workspaces', workspacesRouter)
 app.use('/api/workspaces', skillsRouter)
 app.use('/api/workspaces', mcpsRouter)
 app.use('/api/workspaces', pluginsRouter)
+app.use('/api/workspaces', hooksRouter)
 
 // Serve 前端静态文件（生产模式）
 const distDir = path.join(__dirname, '..', 'dist', 'client')

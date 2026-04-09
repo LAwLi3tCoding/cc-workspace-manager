@@ -73,13 +73,14 @@ export class ConfigReader {
   } {
     const global = this.readGlobalSettings()
 
-    if (global.enableAllProjectMcpServers) {
-      return { enabled: true, overrideByEnableAll: true }
-    }
-
+    // 黑名单优先级最高，即使 enableAllProjectMcpServers=true 也可以被黑名单覆盖
     const disabled = global.disabledMcpjsonServers ?? []
     if (disabled.includes(serverName)) {
       return { enabled: false, overrideByEnableAll: false }
+    }
+
+    if (global.enableAllProjectMcpServers) {
+      return { enabled: true, overrideByEnableAll: true }
     }
 
     const enabled = global.enabledMcpjsonServers ?? []

@@ -48,3 +48,11 @@ export interface Plugin {
   blocklisted: boolean
   blocklistReason?: string
 }
+
+export interface HookFile {
+  filename: string
+  scope: 'global' | 'project'
+  path: string
+  content: string
+  sizeBytes: number
+}

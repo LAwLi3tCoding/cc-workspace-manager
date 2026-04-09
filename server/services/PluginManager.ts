@@ -34,7 +34,9 @@ export class PluginManager {
 
     try {
       if (fs.existsSync(registryPath)) {
-        registry = JSON.parse(fs.readFileSync(registryPath, 'utf-8'))
+        const raw = JSON.parse(fs.readFileSync(registryPath, 'utf-8'))
+        // 支持两种格式：{ plugins: {...} } 和直接的 { key: [...] }
+        registry = raw.plugins ?? raw
       }
       if (fs.existsSync(blocklistPath)) {
         blocklist = JSON.parse(fs.readFileSync(blocklistPath, 'utf-8'))
@@ -87,10 +89,15 @@ export class PluginManager {
     const registryPath = path.join(this.homeDir, '.claude', 'plugins', 'installed_plugins.json')
     if (!fs.existsSync(registryPath)) return
 
-    const registry: Record<string, InstalledPlugin[]> = JSON.parse(
-      fs.readFileSync(registryPath, 'utf-8')
-    )
+    const raw = JSON.parse(fs.readFileSync(registryPath, 'utf-8'))
+    const isWrapped = 'plugins' in raw
+    const registry: Record<string, InstalledPlugin[]> = isWrapped ? raw.plugins : raw
     const { [pluginKey]: _removed, ...rest } = registry
-    this.writer.patchJson(registryPath, rest)
+
+    if (isWrapped) {
+      this.writer.patchJson(registryPath, { plugins: rest })
+    } else {
+      this.writer.patchJson(registryPath, rest)
+    }
   }
 }
