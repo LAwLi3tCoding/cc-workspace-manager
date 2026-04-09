@@ -1,0 +1,71 @@
+{
+  "updatedAt": "2026-04-09T11:58:59.656Z",
+  "missions": [
+    {
+      "id": "session:50578895-183c-40e8-ab3e-522e00163558:none",
+      "source": "session",
+      "name": "none",
+      "objective": "Session mission",
+      "createdAt": "2026-04-09T11:57:38.164Z",
+      "updatedAt": "2026-04-09T11:58:59.656Z",
+      "status": "running",
+      "workerCount": 2,
+      "taskCounts": {
+        "total": 2,
+        "pending": 0,
+        "blocked": 0,
+        "inProgress": 1,
+        "completed": 1,
+        "failed": 0
+      },
+      "agents": [
+        {
+          "name": "general-purpose:a29d35e",
+          "role": "general-purpose",
+          "ownership": "a29d35e6b006dcf88",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-04-09T11:58:09.758Z"
+        },
+        {
+          "name": "executor:af8c70a",
+          "role": "executor",
+          "ownership": "af8c70a50620eba84",
+          "status": "running",
+          "currentStep": null,
+          "latestUpdate": null,
+          "completedSummary": null,
+          "updatedAt": "2026-04-09T11:58:59.656Z"
+        }
+      ],
+      "timeline": [
+        {
+          "id": "session-start:a29d35e6b006dcf88:2026-04-09T11:57:38.164Z",
+          "at": "2026-04-09T11:57:38.164Z",
+          "kind": "update",
+          "agent": "general-purpose:a29d35e",
+          "detail": "started general-purpose:a29d35e",
+          "sourceKey": "session-start:a29d35e6b006dcf88"
+        },
+        {
+          "id": "session-stop:a29d35e6b006dcf88:2026-04-09T11:58:09.758Z",
+          "at": "2026-04-09T11:58:09.758Z",
+          "kind": "completion",
+          "agent": "general-purpose:a29d35e",
+          "detail": "completed",
+          "sourceKey": "session-stop:a29d35e6b006dcf88"
+        },
+        {
+          "id": "session-start:af8c70a50620eba84:2026-04-09T11:58:59.656Z",
+          "at": "2026-04-09T11:58:59.656Z",
+          "kind": "update",
+          "agent": "executor:af8c70a",
+          "detail": "started executor:af8c70a",
+          "sourceKey": "session-start:af8c70a50620eba84"
+        }
+      ]
+    }
+  ]
+}
