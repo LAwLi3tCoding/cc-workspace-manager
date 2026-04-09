@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"npm run build 2>&1\",\"timeout\":60000,\"description\":\"重新 build\"}",
+  "error": "Exit code 2\n\n> cc-workspace-manager@1.0.0 build\n> tsc -p server/tsconfig.json && vite build client\n\nserver/services/__tests__/ConfigReader.test.ts(20,20): error TS2322: Type 'VitestUtils' is not assignable to type 'Awaitable<HookCleanupCallback>'.\nserver/services/__tests__/ConfigWriter.test.ts(8,20): error TS2322: Type 'VitestUtils' is not assignable to type 'Awaitable<HookCleanupCallback>'.\nserver/services/__tests__/McpManager.test.ts(10,20): error TS2322: Type 'VitestUtils' is not assignable t...",
+  "timestamp": "2026-04-09T12:21:28.623Z",
+  "retry_count": 2
+}

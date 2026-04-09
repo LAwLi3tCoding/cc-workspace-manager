@@ -1,4 +1,4 @@
-import type { Workspace, Skill, McpServer, Plugin } from '../../server/types'
+import type { Workspace, Skill, McpServer, Plugin, HookFile } from '../../server/types'
 
 const BASE = '/api'
 
@@ -50,6 +50,14 @@ export const api = {
 
   deletePlugin: (workspaceId: string, pluginKey: string) =>
     request<{ ok: boolean }>(`/workspaces/${workspaceId}/plugins/${encodeURIComponent(pluginKey)}`, {
+      method: 'DELETE',
+    }),
+
+  getHooks: (workspaceId: string) =>
+    request<HookFile[]>(`/workspaces/${workspaceId}/hooks`),
+
+  deleteHook: (workspaceId: string, filename: string, scope: string) =>
+    request<{ ok: boolean }>(`/workspaces/${workspaceId}/hooks/${encodeURIComponent(filename)}?scope=${scope}`, {
       method: 'DELETE',
     }),
 }

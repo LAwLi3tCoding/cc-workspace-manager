@@ -5,29 +5,29 @@ interface Props {
 }
 
 const sourceLabel: Record<string, string> = {
-  global: '全局',
-  project: '项目级',
-  local: '本地',
-  blocklist: '黑名单',
+  global: 'global',
+  project: 'project',
+  local: 'local',
+  blocklist: 'blocklist',
 }
 
 export function ScopeLabel({ effective }: Props) {
   const label = sourceLabel[effective.source] ?? effective.source
 
   return (
-    <span className="inline-flex items-center gap-1 text-xs">
-      <span className={`px-1.5 py-0.5 rounded font-medium ${
+    <span className="inline-flex items-center gap-1.5 text-xs">
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium text-xs ${
         effective.enabled
-          ? 'bg-green-100 text-green-700'
-          : 'bg-red-100 text-red-700'
+          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+          : 'bg-red-50 text-red-500 border border-red-200'
       }`}>
-        {effective.enabled ? '启用' : '禁用'}
+        <span className={`w-1.5 h-1.5 rounded-full ${effective.enabled ? 'bg-emerald-500' : 'bg-red-400'}`} />
+        {effective.enabled ? 'enabled' : 'disabled'}
       </span>
-      <span className="text-gray-400">via {label}</span>
+      <span className="text-slate-400 font-mono text-[10px]">via {label}</span>
       {effective.overrides && (
-        <span className="text-gray-400 text-xs">
-          （覆盖{sourceLabel[effective.overrides.source]}
-          {effective.overrides.value ? '启用' : '禁用'}）
+        <span className="text-slate-400 text-[10px]">
+          · overrides {sourceLabel[effective.overrides.source]} {effective.overrides.value ? 'on' : 'off'}
         </span>
       )}
     </span>

@@ -7,37 +7,82 @@ interface Props {
   loading: boolean
 }
 
+function WorkspaceIcon({ isGlobal, name }: { isGlobal: boolean; name: string }) {
+  if (isGlobal) {
+    return (
+      <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+        <span className="text-blue-400 text-xs">⬡</span>
+      </div>
+    )
+  }
+  const initial = name.charAt(0).toUpperCase()
+  const colors = ['bg-violet-500/20 text-violet-400', 'bg-emerald-500/20 text-emerald-400',
+    'bg-orange-500/20 text-orange-400', 'bg-pink-500/20 text-pink-400',
+    'bg-cyan-500/20 text-cyan-400', 'bg-yellow-500/20 text-yellow-400']
+  const color = colors[initial.charCodeAt(0) % colors.length]
+  return (
+    <div className={`w-7 h-7 rounded-lg ${color} flex items-center justify-center flex-shrink-0`}>
+      <span className="text-xs font-bold font-mono">{initial}</span>
+    </div>
+  )
+}
+
 export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Props) {
   return (
-    <aside className="w-64 shrink-0 border-r border-gray-200 bg-gray-50 flex flex-col">
-      <div className="p-3 border-b border-gray-200">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          工作空间
-        </h2>
+    <aside className="w-60 shrink-0 flex flex-col" style={{ background: 'var(--sidebar-bg)' }}>
+      {/* Header */}
+      <div className="px-4 pt-5 pb-3" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-md bg-blue-500 flex items-center justify-center">
+            <span className="text-white text-xs font-bold">CC</span>
+          </div>
+          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--sidebar-text)' }}>
+            Workspaces
+          </span>
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto py-1">
+
+      {/* List */}
+      <div className="flex-1 overflow-y-auto py-2">
         {loading && (
-          <p className="text-xs text-gray-400 px-3 py-2">加载中...</p>
+          <div className="px-4 py-2 space-y-2">
+            {[1,2,3].map(i => (
+              <div key={i} className="skeleton h-8 w-full opacity-20" />
+            ))}
+          </div>
         )}
         {workspaces.map(ws => (
           <button
             key={ws.id}
             onClick={() => onSelect(ws.id)}
-            className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-              selected === ws.id
-                ? 'bg-blue-50 text-blue-700 font-medium'
-                : 'text-gray-700 hover:bg-gray-100'
-            } ${!ws.exists ? 'opacity-50' : ''}`}
+            className={`ws-item w-full text-left px-3 py-2 flex items-center gap-2.5 ${
+              selected === ws.id ? 'active' : ''
+            }`}
           >
-            <div className="truncate">{ws.name}</div>
-            {ws.isGlobal && (
-              <div className="text-xs text-gray-400">全局配置</div>
-            )}
-            {!ws.exists && (
-              <div className="text-xs text-red-400">目录已删除</div>
-            )}
+            <WorkspaceIcon isGlobal={ws.isGlobal} name={ws.name} />
+            <div className="min-w-0">
+              <div className={`text-xs font-medium truncate ${
+                selected === ws.id
+                  ? 'text-slate-100'
+                  : 'text-slate-400'
+              }`}>
+                {ws.name}
+              </div>
+              {ws.isGlobal && (
+                <div className="text-[10px] font-mono" style={{ color: 'var(--sidebar-text)' }}>
+                  global
+                </div>
+              )}
+            </div>
           </button>
         ))}
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-3" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
+        <p className="text-[10px] font-mono" style={{ color: 'var(--sidebar-text)' }}>
+          {workspaces.length} workspaces
+        </p>
       </div>
     </aside>
   )
