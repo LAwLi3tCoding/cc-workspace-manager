@@ -17,15 +17,14 @@ router.get('/:workspaceId/mcps', (req, res) => {
     const resolved = resolveWorkspace(req.params.workspaceId)
     if (!resolved) return res.status(404).json({ error: 'Workspace not found' })
     const mgr = new McpManager(HOME)
-    // 项目工作空间：合并全局 MCP + 项目独有 MCP
-    // 全局和项目同名时，只显示全局的（badge=global），项目里的重复条目不单独显示
-    // 只有项目里有、全局没有的才显示为 project
+    // 项目工作空间：项目 MCP 优先，同名时覆盖全局（显示 project badge）
+    // 删除项目级别后，全局同名的会重新显示（global badge）
     if (resolved.scope === 'project') {
       const globalMcps = mgr.list('global', HOME)
       const projectMcps = mgr.list('project', resolved.basePath)
-      const globalNames = new Set(globalMcps.map(m => m.name))
-      const projectOnlyMcps = projectMcps.filter(m => !globalNames.has(m.name))
-      return res.json([...globalMcps, ...projectOnlyMcps])
+      const projectNames = new Set(projectMcps.map(m => m.name))
+      const merged = [...globalMcps.filter(m => !projectNames.has(m.name)), ...projectMcps]
+      return res.json(merged)
     }
     res.json(mgr.list(resolved.scope, resolved.basePath))
   } catch (err) {
