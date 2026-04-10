@@ -577,17 +577,23 @@ export default function App() {
 
               {/* MCPs */}
               {activeTab === 'mcps' && (
-                mcps.length === 0
+                <>
+                  {/* 提示：enable/disable 全局生效 */}
+                  <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 flex items-start gap-2">
+                    <span className="flex-shrink-0 mt-0.5">⚠</span>
+                    <span>MCP 的开启/关闭写入<strong>全局</strong> settings.json，对所有工作空间生效。如需仅在此工作空间使用某 MCP，请用"+ 添加 MCP"选择 project scope 单独配置。</span>
+                  </div>
+                  {mcps.length === 0
                   ? <EmptyState icon="🔌" title="No MCP servers" desc="No MCP servers configured" />
                   : mcps.map(mcp => (
                     <ItemCard
                       key={mcp.name}
                       name={mcp.name}
-                      description={`${mcp.command} ${mcp.args.join(' ')}`}
+                      description={mcp.type === 'sse' ? `sse · ${mcp.url}` : `${mcp.command ?? ''} ${(mcp.args ?? []).join(' ')}`.trim()}
                       effective={mcp.effective}
                       disabledReason={mcp.overrideByEnableAll ? 'enableAllProjectMcpServers=true · disable writes to blacklist' : undefined}
                       onToggle={enabled =>
-                        api.setMcpEnabled(selectedId!, mcp.name, enabled)
+                        api.setMcpEnabled('global', mcp.name, enabled)
                           .then(() => loadTabData(selectedId!, 'mcps'))
                           .catch(e => setError(extractError(e)))
                       }
@@ -596,7 +602,8 @@ export default function App() {
                         api.deleteMcp(selectedId!, mcp.name)
                       )}
                     />
-                  ))
+                  ))}
+                </>
               )}
 
               {/* Plugins */}
