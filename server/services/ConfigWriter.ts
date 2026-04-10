@@ -2,7 +2,25 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 export class ConfigWriter {
+  // per-file 串行写入队列，防止并发 read-modify-write 竞态
+  private queues = new Map<string, Promise<void>>()
+
+  private enqueue(filePath: string, fn: () => void): Promise<void> {
+    const prev = this.queues.get(filePath) ?? Promise.resolve()
+    const next = prev.then(() => fn()).catch(() => fn())
+    this.queues.set(filePath, next)
+    return next
+  }
+
   patchJson(filePath: string, patch: Record<string, unknown>): void {
+    this._patchJsonSync(filePath, patch)
+  }
+
+  patchJsonAsync(filePath: string, patch: Record<string, unknown>): Promise<void> {
+    return this.enqueue(filePath, () => this._patchJsonSync(filePath, patch))
+  }
+
+  private _patchJsonSync(filePath: string, patch: Record<string, unknown>): void {
     const dir = path.dirname(filePath)
     const tmpPath = filePath + '.tmp'
     const bakPath = filePath + '.bak'
@@ -37,11 +55,9 @@ export class ConfigWriter {
     }
 
     fs.writeFileSync(tmpPath, JSON.stringify(merged, null, 2), 'utf-8')
-
     if (fs.existsSync(filePath)) {
       fs.copyFileSync(filePath, bakPath)
     }
-
     fs.renameSync(tmpPath, filePath)
   }
 
