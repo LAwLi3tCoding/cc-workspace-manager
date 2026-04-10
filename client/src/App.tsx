@@ -287,6 +287,8 @@ export default function App() {
                             : { label: 'project', color: 'green' as const },
                           ...(skill.isSymlink ? [{ label: 'symlink', color: 'yellow' as const }] : []),
                         ]}
+                        symlinkTarget={skill.symlinkTarget}
+                        symlinkBroken={skill.symlinkBroken}
                         onDelete={canDelete ? () => confirmDelete(skill.name, () =>
                           api.deleteSkill(selectedId!, skill.name, skill.scope)
                         ) : undefined}

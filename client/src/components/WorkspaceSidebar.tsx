@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Workspace } from '../../../server/types'
 
 interface Props {
@@ -28,11 +29,20 @@ function WorkspaceIcon({ isGlobal, name }: { isGlobal: boolean; name: string }) 
 }
 
 export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Props) {
+  const [query, setQuery] = useState('')
+
+  const filtered = query.trim()
+    ? workspaces.filter(ws =>
+        ws.name.toLowerCase().includes(query.toLowerCase()) ||
+        ws.path.toLowerCase().includes(query.toLowerCase())
+      )
+    : workspaces
+
   return (
     <aside className="w-60 shrink-0 flex flex-col" style={{ background: 'var(--sidebar-bg)' }}>
       {/* Header */}
       <div className="px-4 pt-5 pb-3" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-3">
           <div className="w-6 h-6 rounded-md bg-blue-500 flex items-center justify-center">
             <span className="text-white text-xs font-bold">CC</span>
           </div>
@@ -40,6 +50,14 @@ export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Pr
             Workspaces
           </span>
         </div>
+        {/* Search box */}
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="搜索工作空间..."
+          className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/10 border border-white/10 text-slate-300 placeholder-slate-500 focus:outline-none focus:border-blue-400/50"
+        />
       </div>
 
       {/* List */}
@@ -51,7 +69,10 @@ export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Pr
             ))}
           </div>
         )}
-        {workspaces.map(ws => (
+        {!loading && filtered.length === 0 && (
+          <p className="px-4 py-3 text-xs text-slate-500">未找到匹配的工作空间</p>
+        )}
+        {filtered.map(ws => (
           <button
             key={ws.id}
             onClick={() => onSelect(ws.id)}
@@ -62,9 +83,7 @@ export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Pr
             <WorkspaceIcon isGlobal={ws.isGlobal} name={ws.name} />
             <div className="min-w-0">
               <div className={`text-xs font-medium truncate ${
-                selected === ws.id
-                  ? 'text-slate-100'
-                  : 'text-slate-400'
+                selected === ws.id ? 'text-slate-100' : 'text-slate-400'
               }`}>
                 {ws.name}
               </div>
@@ -81,7 +100,7 @@ export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Pr
       {/* Footer */}
       <div className="px-4 py-3" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
         <p className="text-[10px] font-mono" style={{ color: 'var(--sidebar-text)' }}>
-          {workspaces.length} workspaces
+          {filtered.length}/{workspaces.length} workspaces
         </p>
       </div>
     </aside>

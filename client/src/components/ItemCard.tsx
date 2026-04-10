@@ -19,6 +19,8 @@ interface Props {
   disabled?: boolean
   disabledReason?: string
   extra?: React.ReactNode
+  symlinkTarget?: string
+  symlinkBroken?: boolean
 }
 
 const badgeColors = {
@@ -31,6 +33,7 @@ const badgeColors = {
 export function ItemCard({
   name, description, effective, badge, badgeColor = 'yellow', badges,
   onToggle, onDelete, deleteDisabledReason, disabled, disabledReason, extra,
+  symlinkTarget, symlinkBroken,
 }: Props) {
   const allBadges: BadgeItem[] = badges ?? (badge ? [{ label: badge, color: badgeColor }] : [])
   return (
@@ -51,6 +54,16 @@ export function ItemCard({
             </span>
           ))}
         </div>
+        {symlinkTarget && (
+          <span
+            className={`text-[10px] font-mono truncate max-w-[180px] block mt-0.5 ${
+              symlinkBroken ? 'text-red-400' : 'text-slate-400'
+            }`}
+            title={symlinkTarget}
+          >
+            {symlinkBroken ? '⚠ 断链: ' : '→ '}{symlinkTarget}
+          </span>
+        )}
         {description && (
           <p className="text-xs text-slate-500 mt-0.5 font-mono truncate">{description}</p>
         )}

@@ -24,6 +24,7 @@ export interface Skill {
   path: string
   isSymlink: boolean
   symlinkTarget?: string
+  symlinkBroken?: boolean
 }
 
 export interface McpServer {

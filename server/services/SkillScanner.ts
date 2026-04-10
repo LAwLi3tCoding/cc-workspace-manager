@@ -27,12 +27,21 @@ export class SkillScanner {
         let symlinkTarget: string | undefined
         let resolvedPath = fullPath
 
+        let symlinkBroken: boolean | undefined
         if (isSymlink) {
-          symlinkTarget = fs.readlinkSync(fullPath)
           try {
-            resolvedPath = fs.realpathSync(fullPath)
+            symlinkTarget = fs.readlinkSync(fullPath)
+            const resolvedTarget = path.isAbsolute(symlinkTarget)
+              ? symlinkTarget
+              : path.resolve(path.dirname(fullPath), symlinkTarget)
+            symlinkBroken = !fs.existsSync(resolvedTarget)
+            try {
+              resolvedPath = fs.realpathSync(fullPath)
+            } catch {
+              // broken symlink — still include it
+            }
           } catch {
-            // broken symlink — still include it
+            symlinkBroken = true
           }
         }
 
@@ -53,6 +62,7 @@ export class SkillScanner {
           path: fullPath,
           isSymlink,
           symlinkTarget,
+          symlinkBroken,
         })
       } catch {
         // skip unreadable entries
