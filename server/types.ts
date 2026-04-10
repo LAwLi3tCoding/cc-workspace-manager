@@ -28,8 +28,10 @@ export interface Skill {
 
 export interface McpServer {
   name: string
-  command: string
-  args: string[]
+  type: 'stdio' | 'sse'
+  command?: string
+  args?: string[]
+  url?: string
   env?: Record<string, string>
   definedIn: 'global' | 'project'
   effective: EffectiveState
