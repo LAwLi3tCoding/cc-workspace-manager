@@ -8,6 +8,7 @@ import skillsRouter from './routes/skills'
 import mcpsRouter from './routes/mcps'
 import pluginsRouter from './routes/plugins'
 import hooksRouter from './routes/hooks'
+import eventsRouter, { initFileWatcher } from './routes/events'
 
 const app = express()
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 47890
@@ -77,6 +78,10 @@ app.use('/api/workspaces', skillsRouter)
 app.use('/api/workspaces', mcpsRouter)
 app.use('/api/workspaces', pluginsRouter)
 app.use('/api/workspaces', hooksRouter)
+app.use('/api/events', eventsRouter)
+
+// 启动文件监听（生产和开发模式均启动）
+initFileWatcher()
 
 // Serve 前端静态文件（生产模式）
 const distDir = path.join(__dirname, '..', 'client')
