@@ -233,6 +233,7 @@ export default function App() {
                         onDelete={canDelete ? () => confirmDelete(skill.name, () =>
                           api.deleteSkill(selectedId!, skill.name, skill.scope)
                         ) : undefined}
+                        deleteDisabledReason={!canDelete ? '全局 skill 不可在项目工作空间中删除' : undefined}
                       />
                     )
                   })
