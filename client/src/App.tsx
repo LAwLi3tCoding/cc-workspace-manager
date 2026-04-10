@@ -104,6 +104,27 @@ export default function App() {
     }).catch(e => setError(String(e)))
   }, [])
 
+  const loadAllData = useCallback(async (wsId: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [s, m, p, h] = await Promise.all([
+        api.getSkills(wsId),
+        api.getMcps(wsId),
+        api.getPlugins(wsId),
+        api.getHooks(wsId),
+      ])
+      setSkills(s)
+      setMcps(m)
+      setPlugins(p)
+      setHooks(h)
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   const loadTabData = useCallback(async (wsId: string, tab: TabId) => {
     setLoading(true)
     setError(null)
@@ -120,11 +141,11 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (selectedId) loadTabData(selectedId, activeTab)
-  }, [selectedId, activeTab, loadTabData])
+    if (selectedId) loadAllData(selectedId)
+  }, [selectedId, loadAllData])
 
   const refresh = () => {
-    if (selectedId) loadTabData(selectedId, activeTab)
+    if (selectedId) loadAllData(selectedId)
   }
 
   const confirmDelete = (name: string, action: () => Promise<unknown>) => {
