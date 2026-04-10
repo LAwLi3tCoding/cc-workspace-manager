@@ -7,7 +7,7 @@ export class ConfigWriter {
 
   private enqueue(filePath: string, fn: () => void): Promise<void> {
     const prev = this.queues.get(filePath) ?? Promise.resolve()
-    const next = prev.then(() => fn()).catch(() => fn())
+    const next = prev.then(() => fn(), () => fn())
     this.queues.set(filePath, next)
     return next
   }
