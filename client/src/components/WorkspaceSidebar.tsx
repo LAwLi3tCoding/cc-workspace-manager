@@ -69,7 +69,7 @@ export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Pr
             ))}
           </div>
         )}
-        {!loading && filtered.length === 0 && (
+        {!loading && filtered.length === 0 && query.trim() && (
           <p className="px-4 py-3 text-xs text-slate-500">未找到匹配的工作空间</p>
         )}
         {filtered.map(ws => (
