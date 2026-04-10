@@ -29,6 +29,11 @@ router.post('/:workspaceId/hooks', (req, res) => {
     }
     if (!event || !command) return res.status(400).json({ error: '`event` and `command` are required' })
 
+    const VALID_HOOK_EVENTS = ['PreToolUse', 'PostToolUse', 'Stop', 'Notification', 'SubagentStop']
+    if (!VALID_HOOK_EVENTS.includes(event)) {
+      return res.status(400).json({ error: `Invalid event. Must be one of: ${VALID_HOOK_EVENTS.join(', ')}` })
+    }
+
     const scanner = new HooksScanner(HOME)
     let settingsPath: string
     if (scope === 'global' || workspaceId === 'global') {
