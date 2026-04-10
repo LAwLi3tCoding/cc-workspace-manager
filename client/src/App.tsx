@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Workspace, Skill, McpServer, Plugin, HookFile } from '../../server/types'
 import { api } from './api'
 import { WorkspaceSidebar } from './components/WorkspaceSidebar'
@@ -90,6 +90,8 @@ export default function App() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<TabId>('skills')
+  const activeTabRef = useRef<TabId>('skills')
+  useEffect(() => { activeTabRef.current = activeTab }, [activeTab])
   const [skills, setSkills] = useState<Skill[]>([])
   const [mcps, setMcps] = useState<McpServer[]>([])
   const [plugins, setPlugins] = useState<Plugin[]>([])
@@ -160,17 +162,22 @@ export default function App() {
 
   // SSE 实时同步：文件变化时自动刷新当前 Tab
   useEffect(() => {
+    if (!selectedId) return
     const es = new EventSource('/api/events')
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data) as { type: string; workspaceId: string }
         if (msg.type === 'workspace-changed' && msg.workspaceId === selectedId) {
-          if (selectedId) loadTabData(selectedId, activeTab)
+          loadTabData(selectedId, activeTabRef.current)
         }
       } catch { /* ignore malformed */ }
     }
+    es.onerror = () => {
+      // EventSource 会自动重连，此处仅记录
+      console.warn('[SSE] connection error, browser will retry automatically')
+    }
     return () => es.close()
-  }, [selectedId, activeTab, loadTabData])
+  }, [selectedId, loadTabData])
 
   const refresh = () => {
     if (selectedId) loadTabData(selectedId, activeTab)
