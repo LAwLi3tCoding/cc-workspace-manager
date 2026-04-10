@@ -591,6 +591,7 @@ export default function App() {
                       name={mcp.name}
                       description={mcp.type === 'sse' ? `sse · ${mcp.url}` : `${mcp.command ?? ''} ${(mcp.args ?? []).join(' ')}`.trim()}
                       effective={mcp.effective}
+                      badges={[{ label: mcp.definedIn, color: mcp.definedIn === 'project' ? 'green' : 'blue' }]}
                       disabledReason={mcp.overrideByEnableAll ? 'enableAllProjectMcpServers=true · disable writes to blacklist' : undefined}
                       onToggle={enabled =>
                         api.setMcpEnabled('global', mcp.name, enabled)
