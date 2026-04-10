@@ -13,7 +13,7 @@ RELEASE_TAG="${CC_VERSION:-latest}"           # 可用环境变量覆盖版本
 INSTALL_DIR="$HOME/cc-workspace-manager"
 PLIST_LABEL="com.ccworkspace.manager"
 PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_LABEL}.plist"
-PORT=7890
+PORT=47890
 LOG_DIR="$INSTALL_DIR/.omc/logs"
 
 echo ""

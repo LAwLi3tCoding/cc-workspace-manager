@@ -24,6 +24,12 @@ router.delete('/:workspaceId/hooks/:filename', (req, res) => {
   try {
     const { workspaceId, filename } = req.params
     const { scope } = req.query as { scope?: string }
+
+    // 防止 path traversal：filename 不能包含路径分隔符
+    if (filename.includes('/') || filename.includes('..') || filename.includes('\0')) {
+      return res.status(400).json({ error: 'Invalid filename' })
+    }
+
     const scanner = new HooksScanner(HOME)
     let hooks
     if (scope === 'global' || workspaceId === 'global') {

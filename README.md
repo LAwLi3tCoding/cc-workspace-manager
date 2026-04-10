@@ -1,16 +1,37 @@
 # CC Workspace Manager
 
-本地可视化工具，用于管理所有 Claude Code 工作空间中的 Skill、MCP Server 和 Plugin。
+本地可视化工具，用于管理所有 Claude Code 工作空间中的 Skill、MCP Server、Plugin 和 Hook。
+
+## 安装
+
+### 方式一：一键安装（推荐）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/LAwLi3t-CN/cc-workspace-manager/master/install.sh | bash
+```
+
+### 方式二：下载安装包
+
+1. 前往 [Releases](https://github.com/LAwLi3t-CN/cc-workspace-manager/releases) 下载最新的 `cc-workspace-manager-release.tar.gz`
+2. 解压并运行安装脚本：
+
+```bash
+tar -xzf cc-workspace-manager-release.tar.gz
+cd cc-workspace-manager
+bash install.sh
+```
+
+**要求**：macOS，Node.js 18+
+
+安装完成后服务自动启动，开机也会自动启动，无需手动操作。
+
+---
 
 ## 访问
 
-服务已注册为 macOS 后台服务，开机自动启动：
-
 ```
-http://localhost:7890
+http://localhost:47890
 ```
-
-无需手动启动，直接打开浏览器访问即可。
 
 ---
 
@@ -38,6 +59,10 @@ http://localhost:7890
 - Toggle 开关按当前工作空间层级写入对应 `settings.json`
 - 已屏蔽（blocklist）的 plugin 有"已屏蔽"标注
 
+### Hooks Tab
+- 展示全局和项目级的所有 hook 脚本
+- 支持删除 hook 文件
+
 ---
 
 ## 安全机制
@@ -61,16 +86,18 @@ launchctl unload ~/Library/LaunchAgents/com.ccworkspace.manager.plist
 # 启动服务
 launchctl load ~/Library/LaunchAgents/com.ccworkspace.manager.plist
 
-# 更新代码后重新部署
-launchctl unload ~/Library/LaunchAgents/com.ccworkspace.manager.plist
-cd ~/cc-workspace-manager
-npm run build
-launchctl load ~/Library/LaunchAgents/com.ccworkspace.manager.plist
-
 # 查看运行日志
 tail -f ~/cc-workspace-manager/.omc/logs/server.log
 tail -f ~/cc-workspace-manager/.omc/logs/server.error.log
 ```
+
+### 更新到新版本
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/LAwLi3t-CN/cc-workspace-manager/master/install.sh | bash
+```
+
+重新运行安装脚本即可，会自动停止旧服务、安装新版本并重启。
 
 ---
 
@@ -83,8 +110,8 @@ cd ~/cc-workspace-manager
 npm run dev
 ```
 
-- 前端：`http://localhost:3000`（Vite 热重载）
-- 后端：`http://localhost:3001`（nodemon 热重载）
+- 前端：`http://localhost:3000`（Vite 热重载，代理 API 到后端）
+- 后端：`http://localhost:47890`（nodemon 热重载）
 
 ---
 
@@ -94,7 +121,7 @@ npm run dev
 |------|------|
 | 后端 | Node.js 18+, TypeScript, Express |
 | 前端 | React 18, Vite, TailwindCSS |
-| 测试 | Vitest（13 个单元测试） |
+| 测试 | Vitest |
 | 部署 | macOS launchd（开机自启） |
 
 ---
@@ -104,7 +131,7 @@ npm run dev
 ```
 cc-workspace-manager/
 ├── server/
-│   ├── index.ts               # Express 入口（port 7890）
+│   ├── index.ts               # Express 入口（port 47890）
 │   ├── types.ts               # 共享 TypeScript 类型
 │   ├── services/
 │   │   ├── WorkspaceScanner   # 扫描工作空间
@@ -112,7 +139,8 @@ cc-workspace-manager/
 │   │   ├── ConfigWriter       # 原子写
 │   │   ├── SkillScanner       # 扫描 skill 目录
 │   │   ├── McpManager         # MCP server 管理
-│   │   └── PluginManager      # Plugin 管理
+│   │   ├── PluginManager      # Plugin 管理
+│   │   └── HooksScanner       # Hook 扫描
 │   └── routes/                # REST API 路由
 ├── client/
 │   └── src/
@@ -120,6 +148,6 @@ cc-workspace-manager/
 │       ├── api.ts             # API 调用封装
 │       └── components/        # UI 组件
 ├── dist/                      # 构建产物（生产模式）
-└── ~/Library/LaunchAgents/
-    └── com.ccworkspace.manager.plist  # launchd 服务配置
+├── install.sh                 # 一键安装脚本
+└── package-release.sh         # 打包发布脚本
 ```

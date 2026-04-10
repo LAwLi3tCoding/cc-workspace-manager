@@ -9,7 +9,7 @@ import pluginsRouter from './routes/plugins'
 import hooksRouter from './routes/hooks'
 
 const app = express()
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 7890
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 47890
 
 app.use(cors())
 app.use(express.json())
