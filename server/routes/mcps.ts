@@ -17,6 +17,14 @@ router.get('/:workspaceId/mcps', (req, res) => {
     const resolved = resolveWorkspace(req.params.workspaceId)
     if (!resolved) return res.status(404).json({ error: 'Workspace not found' })
     const mgr = new McpManager(HOME)
+    // 项目工作空间：合并全局 MCP + 项目 MCP（项目同名条目覆盖全局）
+    if (resolved.scope === 'project') {
+      const globalMcps = mgr.list('global', HOME)
+      const projectMcps = mgr.list('project', resolved.basePath)
+      const projectNames = new Set(projectMcps.map(m => m.name))
+      const merged = [...globalMcps.filter(m => !projectNames.has(m.name)), ...projectMcps]
+      return res.json(merged)
+    }
     res.json(mgr.list(resolved.scope, resolved.basePath))
   } catch (err) {
     res.status(500).json({ error: String(err) })
