@@ -102,7 +102,7 @@ function AddMcpModal({
             <div className="flex gap-3">
               {(['stdio', 'sse'] as const).map(t => (
                 <label key={t} className="flex items-center gap-1.5 text-sm cursor-pointer">
-                  <input type="radio" checked={type === t} onChange={() => setType(t)} />
+                  <input type="radio" checked={type === t} onChange={() => { setType(t); setError(null) }} />
                   {t}
                 </label>
               ))}

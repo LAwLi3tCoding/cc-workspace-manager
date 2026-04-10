@@ -11,6 +11,8 @@ export interface Hook {
 }
 
 export class HooksScanner {
+  private writer = new ConfigWriter()
+
   constructor(private homeDir: string = process.env.HOME!) {}
 
   scanGlobal(): Hook[] {
@@ -46,13 +48,12 @@ export class HooksScanner {
     fs.unlinkSync(hookPath)
   }
 
-  createInSettings(
+  async createInSettings(
     settingsPath: string,
     event: string,
     matcher: string,
     command: string
-  ): void {
-    const writer = new ConfigWriter()
+  ): Promise<void> {
     let existing: Record<string, unknown> = {}
     if (fs.existsSync(settingsPath)) {
       try { existing = JSON.parse(fs.readFileSync(settingsPath, 'utf-8')) } catch { existing = {} }
@@ -63,6 +64,6 @@ export class HooksScanner {
       matcher: matcher === '*' ? {} : { tool_name: matcher },
       hooks: [{ type: 'command', command }],
     })
-    writer.patchJson(settingsPath, { hooks: { ...hooks, [event]: eventHooks } })
+    await this.writer.patchJsonAsync(settingsPath, { hooks: { ...hooks, [event]: eventHooks } })
   }
 }

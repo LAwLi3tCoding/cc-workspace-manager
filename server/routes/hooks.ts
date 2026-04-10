@@ -21,7 +21,7 @@ router.get('/:workspaceId/hooks', (req, res) => {
   }
 })
 
-router.post('/:workspaceId/hooks', (req, res) => {
+router.post('/:workspaceId/hooks', async (req, res) => {
   try {
     const { workspaceId } = req.params
     const { event, matcher, command, scope } = req.body as {
@@ -43,7 +43,7 @@ router.post('/:workspaceId/hooks', (req, res) => {
       if (!ws) return res.status(404).json({ error: 'Workspace not found' })
       settingsPath = path.join(ws.path, '.claude', 'settings.json')
     }
-    scanner.createInSettings(settingsPath, event, matcher ?? '*', command)
+    await scanner.createInSettings(settingsPath, event, matcher ?? '*', command)
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ error: String(err) })
