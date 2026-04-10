@@ -26,6 +26,10 @@ router.post('/', (req, res) => {
     if (type !== 'mcp') {
       return res.status(400).json({ error: 'Only mcp copy is supported' })
     }
+    const FORBIDDEN_NAMES = ['__proto__', 'constructor', 'prototype']
+    if (FORBIDDEN_NAMES.includes(itemName)) {
+      return res.status(400).json({ error: 'Invalid MCP server name' })
+    }
 
     const scanner = new WorkspaceScanner()
     const workspaces = scanner.scan()

@@ -415,6 +415,7 @@ export default function App() {
     input.onchange = async () => {
       const file = input.files?.[0]
       if (!file) return
+      if (file.size > 100_000) { setError('文件过大，最大支持 100KB'); return }
       try {
         const text = await file.text()
         const data = JSON.parse(text)

@@ -69,6 +69,8 @@ router.post('/:workspaceId/import', (req, res) => {
     let imported = 0
     for (const mcp of mcps ?? []) {
       if (!mcp.name || !mcp.type) continue
+      const FORBIDDEN_NAMES = ['__proto__', 'constructor', 'prototype']
+      if (FORBIDDEN_NAMES.includes(mcp.name) || mcp.name.trim() === '') continue
       const config = mcp.type === 'sse'
         ? { type: 'sse' as const, url: mcp.url!, env: mcp.env }
         : { type: 'stdio' as const, command: mcp.command!, args: mcp.args, env: mcp.env }
