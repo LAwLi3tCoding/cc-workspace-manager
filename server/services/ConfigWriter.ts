@@ -25,6 +25,24 @@ export class ConfigWriter {
     return this.enqueue(filePath, () => this._patchJsonSync(filePath, patch))
   }
 
+  // 完整替换指定 key 的值（不做对象合并），用于 mcpServers 等需要完整覆盖的场景
+  replaceFieldAsync(filePath: string, fieldName: string, value: unknown): Promise<void> {
+    return this.enqueue(filePath, () => {
+      const dir = path.dirname(filePath)
+      const tmpPath = filePath + '.tmp'
+      const bakPath = filePath + '.bak'
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+      let existing: Record<string, unknown> = {}
+      if (fs.existsSync(filePath)) {
+        try { existing = JSON.parse(fs.readFileSync(filePath, 'utf-8')) } catch { existing = {} }
+      }
+      const result = { ...existing, [fieldName]: value }
+      fs.writeFileSync(tmpPath, JSON.stringify(result, null, 2), 'utf-8')
+      if (fs.existsSync(filePath)) fs.copyFileSync(filePath, bakPath)
+      fs.renameSync(tmpPath, filePath)
+    })
+  }
+
   private _patchJsonSync(filePath: string, patch: Record<string, unknown>): void {
     const dir = path.dirname(filePath)
     const tmpPath = filePath + '.tmp'

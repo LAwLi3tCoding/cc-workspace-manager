@@ -58,7 +58,7 @@ export class McpManager {
       throw new Error(`MCP server '${serverName}' not found`)
     }
     const { [serverName]: _removed, ...rest } = existing
-    await this.writer.patchJsonAsync(mcpPath, { mcpServers: rest })
+    await this.writer.replaceFieldAsync(mcpPath, 'mcpServers', rest)
   }
 
   async create(
@@ -77,6 +77,6 @@ export class McpManager {
       : { url: config.url, env: config.env }
 
     const existing = this.reader.readMcpServers(scope, basePath ?? this.homeDir)
-    await this.writer.patchJsonAsync(mcpPath, { mcpServers: { ...existing, [serverName]: entry } })
+    await this.writer.replaceFieldAsync(mcpPath, 'mcpServers', { ...existing, [serverName]: entry })
   }
 }
