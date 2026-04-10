@@ -7,7 +7,12 @@ export class ConfigWriter {
 
   private enqueue(filePath: string, fn: () => void): Promise<void> {
     const prev = this.queues.get(filePath) ?? Promise.resolve()
-    const next = prev.then(() => fn(), () => fn())
+    const next = prev.then(() => fn(), () => fn()).finally(() => {
+      // 只有当 next 仍是队列末尾时才清理，防止并发新任务时误删
+      if (this.queues.get(filePath) === next) {
+        this.queues.delete(filePath)
+      }
+    })
     this.queues.set(filePath, next)
     return next
   }
@@ -66,24 +71,26 @@ export class ConfigWriter {
     fieldName: string,
     value: string,
     action: 'add' | 'remove'
-  ): void {
-    let existing: Record<string, unknown> = {}
-    if (fs.existsSync(filePath)) {
-      try {
-        existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-      } catch {
-        existing = {}
+  ): Promise<void> {
+    return this.enqueue(filePath, () => {
+      let existing: Record<string, unknown> = {}
+      if (fs.existsSync(filePath)) {
+        try {
+          existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+        } catch {
+          existing = {}
+        }
       }
-    }
 
-    const arr: string[] = Array.isArray(existing[fieldName])
-      ? [...(existing[fieldName] as string[])]
-      : []
+      const arr: string[] = Array.isArray(existing[fieldName])
+        ? [...(existing[fieldName] as string[])]
+        : []
 
-    const updated = action === 'add'
-      ? arr.includes(value) ? arr : [...arr, value]
-      : arr.filter(v => v !== value)
+      const updated = action === 'add'
+        ? arr.includes(value) ? arr : [...arr, value]
+        : arr.filter(v => v !== value)
 
-    this.patchJson(filePath, { [fieldName]: updated })
+      this._patchJsonSync(filePath, { [fieldName]: updated })
+    })
   }
 }

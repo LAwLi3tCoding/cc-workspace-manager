@@ -35,11 +35,11 @@ export class McpManager {
   setEnabled(serverName: string, enabled: boolean): void {
     const settingsPath = path.join(this.homeDir, '.claude', 'settings.json')
     if (enabled) {
-      this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'add')
-      this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'remove')
+      void this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'add')
+      void this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'remove')
     } else {
-      this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'remove')
-      this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'add')
+      void this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'remove')
+      void this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'add')
     }
   }
 
