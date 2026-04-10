@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { Workspace } from '../../../server/types'
 
 interface Props {
@@ -7,6 +7,10 @@ interface Props {
   onSelect: (id: string) => void
   loading: boolean
 }
+
+const ICON_COLORS = ['bg-violet-500/20 text-violet-400', 'bg-emerald-500/20 text-emerald-400',
+  'bg-orange-500/20 text-orange-400', 'bg-pink-500/20 text-pink-400',
+  'bg-cyan-500/20 text-cyan-400', 'bg-yellow-500/20 text-yellow-400']
 
 function WorkspaceIcon({ isGlobal, name }: { isGlobal: boolean; name: string }) {
   if (isGlobal) {
@@ -17,10 +21,7 @@ function WorkspaceIcon({ isGlobal, name }: { isGlobal: boolean; name: string }) 
     )
   }
   const initial = name.charAt(0).toUpperCase()
-  const colors = ['bg-violet-500/20 text-violet-400', 'bg-emerald-500/20 text-emerald-400',
-    'bg-orange-500/20 text-orange-400', 'bg-pink-500/20 text-pink-400',
-    'bg-cyan-500/20 text-cyan-400', 'bg-yellow-500/20 text-yellow-400']
-  const color = colors[initial.charCodeAt(0) % colors.length]
+  const color = ICON_COLORS[initial.charCodeAt(0) % ICON_COLORS.length]
   return (
     <div className={`w-7 h-7 rounded-lg ${color} flex items-center justify-center flex-shrink-0`}>
       <span className="text-xs font-bold font-mono">{initial}</span>
@@ -31,12 +32,15 @@ function WorkspaceIcon({ isGlobal, name }: { isGlobal: boolean; name: string }) 
 export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Props) {
   const [query, setQuery] = useState('')
 
-  const filtered = query.trim()
-    ? workspaces.filter(ws =>
-        ws.name.toLowerCase().includes(query.toLowerCase()) ||
-        ws.path.toLowerCase().includes(query.toLowerCase())
-      )
-    : workspaces
+  const filtered = useMemo(() => {
+    const lowerQuery = query.trim().toLowerCase()
+    return lowerQuery
+      ? workspaces.filter(ws =>
+          ws.name.toLowerCase().includes(lowerQuery) ||
+          ws.path.toLowerCase().includes(lowerQuery)
+        )
+      : workspaces
+  }, [workspaces, query])
 
   return (
     <aside className="w-60 shrink-0 flex flex-col" style={{ background: 'var(--sidebar-bg)' }}>

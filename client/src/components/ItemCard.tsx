@@ -54,14 +54,14 @@ export function ItemCard({
             </span>
           ))}
         </div>
-        {symlinkTarget && (
+        {(symlinkTarget || symlinkBroken) && (
           <span
             className={`text-[10px] font-mono truncate max-w-[180px] block mt-0.5 ${
               symlinkBroken ? 'text-red-400' : 'text-slate-400'
             }`}
-            title={symlinkTarget}
+            title={symlinkTarget ?? '无法读取链接目标'}
           >
-            {symlinkBroken ? '⚠ 断链: ' : '→ '}{symlinkTarget}
+            {symlinkBroken ? '⚠ 断链: ' : '→ '}{symlinkTarget ?? '(未知目标)'}
           </span>
         )}
         {description && (
