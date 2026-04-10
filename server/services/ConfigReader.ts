@@ -11,7 +11,7 @@ interface SettingsJson {
 }
 
 interface McpJson {
-  mcpServers: Record<string, { command: string; args: string[]; env?: Record<string, string> }>
+  mcpServers: Record<string, { command?: string; args?: string[]; env?: Record<string, string>; url?: string }>
 }
 
 export class ConfigReader {

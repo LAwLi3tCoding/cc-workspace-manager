@@ -20,10 +20,10 @@ export class McpManager {
       const { enabled, overrideByEnableAll } = this.reader.getEffectiveMcpState(name)
       results.push({
         name,
-        type: (def as any).url ? 'sse' : 'stdio',
+        type: def.url ? 'sse' : 'stdio',
         command: def.command,
         args: def.args,
-        url: (def as any).url,
+        url: def.url,
         env: def.env,
         definedIn: scope,
         effective: { enabled, source: 'global' },
@@ -34,17 +34,17 @@ export class McpManager {
     return results
   }
 
-  setEnabled(serverName: string, enabled: boolean, scope: 'global' | 'project' = 'global', basePath?: string): void {
+  async setEnabled(serverName: string, enabled: boolean, scope: 'global' | 'project' = 'global', basePath?: string): Promise<void> {
     const settingsPath = scope === 'project' && basePath
       ? path.join(basePath, '.claude', 'settings.json')
       : path.join(this.homeDir, '.claude', 'settings.json')
 
     if (enabled) {
-      void this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'add')
-      void this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'remove')
+      await this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'add')
+      await this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'remove')
     } else {
-      void this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'remove')
-      void this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'add')
+      await this.writer.patchArrayField(settingsPath, 'enabledMcpjsonServers', serverName, 'remove')
+      await this.writer.patchArrayField(settingsPath, 'disabledMcpjsonServers', serverName, 'add')
     }
   }
 
@@ -54,6 +54,9 @@ export class McpManager {
       : path.join(this.homeDir, '.claude', '.mcp.json')
 
     const existing = this.reader.readMcpServers(scope, basePath ?? this.homeDir)
+    if (!(serverName in existing)) {
+      throw new Error(`MCP server '${serverName}' not found`)
+    }
     const { [serverName]: _removed, ...rest } = existing
     this.writer.patchJson(mcpPath, { mcpServers: rest })
   }

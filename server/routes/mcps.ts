@@ -47,7 +47,7 @@ router.post('/:workspaceId/mcps', (req, res) => {
   }
 })
 
-router.patch('/:workspaceId/mcps/:serverName', (req, res) => {
+router.patch('/:workspaceId/mcps/:serverName', async (req, res) => {
   try {
     const resolved = resolveWorkspace(req.params.workspaceId)
     if (!resolved) return res.status(404).json({ error: 'Workspace not found' })
@@ -55,7 +55,7 @@ router.patch('/:workspaceId/mcps/:serverName', (req, res) => {
     const { enabled } = req.body as { enabled: boolean }
     if (typeof enabled !== 'boolean') return res.status(400).json({ error: '`enabled` must be boolean' })
     const mgr = new McpManager(HOME)
-    mgr.setEnabled(serverName, enabled, resolved.scope, resolved.basePath)
+    await mgr.setEnabled(serverName, enabled, resolved.scope, resolved.basePath)
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ error: String(err) })
@@ -71,7 +71,9 @@ router.delete('/:workspaceId/mcps/:serverName', (req, res) => {
     mgr.delete(serverName, resolved.scope, resolved.basePath)
     res.json({ ok: true })
   } catch (err) {
-    res.status(500).json({ error: String(err) })
+    const msg = String(err)
+    if (msg.includes('not found')) return res.status(404).json({ error: msg })
+    res.status(500).json({ error: msg })
   }
 })
 
