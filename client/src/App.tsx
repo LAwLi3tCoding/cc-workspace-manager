@@ -34,6 +34,207 @@ function SkeletonList() {
   )
 }
 
+// ── Add MCP Modal ─────────────────────────────────────────────────────────────
+function AddMcpModal({
+  workspaceId,
+  onClose,
+  onCreated,
+}: {
+  workspaceId: string
+  onClose: () => void
+  onCreated: () => void
+}) {
+  const [type, setType] = useState<'stdio' | 'sse'>('stdio')
+  const [name, setName] = useState('')
+  const [command, setCommand] = useState('')
+  const [args, setArgs] = useState('')
+  const [url, setUrl] = useState('')
+  const [envStr, setEnvStr] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const parseEnv = (s: string): Record<string, string> => {
+    const result: Record<string, string> = {}
+    for (const line of s.split('\n')) {
+      const eq = line.indexOf('=')
+      if (eq > 0) result[line.slice(0, eq).trim()] = line.slice(eq + 1).trim()
+    }
+    return result
+  }
+
+  const submit = async () => {
+    if (!name.trim()) { setError('名称不能为空'); return }
+    if (type === 'stdio' && !command.trim()) { setError('命令不能为空'); return }
+    if (type === 'sse' && !url.trim()) { setError('URL 不能为空'); return }
+    setSaving(true)
+    try {
+      await api.createMcp(workspaceId, {
+        name: name.trim(),
+        type,
+        command: type === 'stdio' ? command.trim() : undefined,
+        args: type === 'stdio' && args.trim() ? args.trim().split(/\s+/) : undefined,
+        url: type === 'sse' ? url.trim() : undefined,
+        env: envStr.trim() ? parseEnv(envStr) : undefined,
+      })
+      onCreated()
+      onClose()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+        <h2 className="text-base font-semibold text-slate-800 mb-4">添加 MCP 服务器</h2>
+        {error && <p className="mb-3 text-xs text-red-500">{error}</p>}
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">名称</label>
+            <input value={name} onChange={e => setName(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+              placeholder="my-mcp-server" />
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">类型</label>
+            <div className="flex gap-3">
+              {(['stdio', 'sse'] as const).map(t => (
+                <label key={t} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                  <input type="radio" checked={type === t} onChange={() => setType(t)} />
+                  {t}
+                </label>
+              ))}
+            </div>
+          </div>
+          {type === 'stdio' ? (
+            <>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">命令</label>
+                <input value={command} onChange={e => setCommand(e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-400"
+                  placeholder="uvx mcp-server-name" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">参数（空格分隔，可选）</label>
+                <input value={args} onChange={e => setArgs(e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-400"
+                  placeholder="--port 8080" />
+              </div>
+            </>
+          ) : (
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">URL</label>
+              <input value={url} onChange={e => setUrl(e.target.value)}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-400"
+                placeholder="http://localhost:3000/sse" />
+            </div>
+          )}
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">环境变量（每行 KEY=VALUE，可选）</label>
+            <textarea value={envStr} onChange={e => setEnvStr(e.target.value)} rows={3}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-blue-400"
+              placeholder={'API_KEY=xxx\nDEBUG=1'} />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-5">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700">取消</button>
+          <button onClick={submit} disabled={saving}
+            className="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+            {saving ? '保存中...' : '添加'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Add Hook Modal ────────────────────────────────────────────────────────────
+const HOOK_EVENTS = ['PreToolUse', 'PostToolUse', 'Stop', 'Notification', 'SubagentStop']
+
+function AddHookModal({
+  workspaceId,
+  onClose,
+  onCreated,
+}: {
+  workspaceId: string
+  onClose: () => void
+  onCreated: () => void
+}) {
+  const [event, setEvent] = useState(HOOK_EVENTS[0])
+  const [matcher, setMatcher] = useState('*')
+  const [command, setCommand] = useState('')
+  const [scope, setScope] = useState<'global' | 'project'>(
+    workspaceId === 'global' ? 'global' : 'project'
+  )
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const submit = async () => {
+    if (!command.trim()) { setError('命令不能为空'); return }
+    setSaving(true)
+    try {
+      await api.createHook(workspaceId, { event, matcher: matcher || '*', command: command.trim(), scope })
+      onCreated()
+      onClose()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+        <h2 className="text-base font-semibold text-slate-800 mb-4">添加 Hook</h2>
+        {error && <p className="mb-3 text-xs text-red-500">{error}</p>}
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">事件类型</label>
+            <select value={event} onChange={e => setEvent(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+              {HOOK_EVENTS.map(ev => <option key={ev} value={ev}>{ev}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">匹配器（工具名或 * 匹配全部）</label>
+            <input value={matcher} onChange={e => setMatcher(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-400"
+              placeholder="* 或 Bash" />
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">命令</label>
+            <input value={command} onChange={e => setCommand(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-400"
+              placeholder="echo hello" />
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">Scope</label>
+            <div className="flex gap-3">
+              {(['global', 'project'] as const).map(s => (
+                <label key={s} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                  <input type="radio" checked={scope === s} onChange={() => setScope(s)}
+                    disabled={workspaceId === 'global' && s === 'project'} />
+                  {s}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-5">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700">取消</button>
+          <button onClick={submit} disabled={saving}
+            className="px-4 py-2 text-sm bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50">
+            {saving ? '保存中...' : '添加'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Hook preview card ────────────────────────────────────────────────────────
 function HookCard({ hook, onDelete }: { hook: HookFile; onDelete: () => void }) {
   const [expanded, setExpanded] = useState(false)
@@ -101,6 +302,8 @@ export default function App() {
   const [updateBanner, setUpdateBanner] = useState<{
     latestVersion: string; releaseUrl: string
   } | null>(null)
+  const [showAddMcp, setShowAddMcp] = useState(false)
+  const [showAddHook, setShowAddHook] = useState(false)
 
   const extractError = (e: unknown): string => {
     if (e instanceof Error) return e.message
@@ -269,6 +472,22 @@ export default function App() {
             <SkeletonList />
           ) : (
             <div className="space-y-2 fade-in">
+              {activeTab === 'mcps' && (
+                <div className="flex justify-end mb-3">
+                  <button onClick={() => setShowAddMcp(true)}
+                    className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-1">
+                    + 添加 MCP
+                  </button>
+                </div>
+              )}
+              {activeTab === 'hooks' && (
+                <div className="flex justify-end mb-3">
+                  <button onClick={() => setShowAddHook(true)}
+                    className="px-3 py-1.5 text-xs bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center gap-1">
+                    + 添加 Hook
+                  </button>
+                </div>
+              )}
               {/* Skills */}
               {activeTab === 'skills' && (
                 skills.length === 0
@@ -363,6 +582,20 @@ export default function App() {
           )}
         </div>
       </main>
+      {showAddMcp && selectedId && (
+        <AddMcpModal
+          workspaceId={selectedId}
+          onClose={() => setShowAddMcp(false)}
+          onCreated={() => selectedId && loadTabData(selectedId, 'mcps')}
+        />
+      )}
+      {showAddHook && selectedId && (
+        <AddHookModal
+          workspaceId={selectedId}
+          onClose={() => setShowAddHook(false)}
+          onCreated={() => selectedId && loadTabData(selectedId, 'hooks')}
+        />
+      )}
     </div>
   )
 }

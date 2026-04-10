@@ -77,6 +77,15 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  createHook: (
+    workspaceId: string,
+    data: { event: string; matcher: string; command: string; scope: 'global' | 'project' }
+  ) =>
+    request<{ ok: boolean }>(`/workspaces/${workspaceId}/hooks`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   checkUpdate: () => request<{
     hasUpdate: boolean
     currentVersion: string
