@@ -61,6 +61,22 @@ export const api = {
       method: 'DELETE',
     }),
 
+  createMcp: (
+    workspaceId: string,
+    data: {
+      name: string
+      type: 'stdio' | 'sse'
+      command?: string
+      args?: string[]
+      url?: string
+      env?: Record<string, string>
+    }
+  ) =>
+    request<{ ok: boolean }>(`/workspaces/${workspaceId}/mcps`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   checkUpdate: () => request<{
     hasUpdate: boolean
     currentVersion: string

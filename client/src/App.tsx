@@ -100,11 +100,16 @@ export default function App() {
     latestVersion: string; releaseUrl: string
   } | null>(null)
 
+  const extractError = (e: unknown): string => {
+    if (e instanceof Error) return e.message
+    return String(e)
+  }
+
   useEffect(() => {
     api.getWorkspaces().then(ws => {
       setWorkspaces(ws)
       if (ws.length > 0) setSelectedId(ws[0].id)
-    }).catch(e => setError(String(e)))
+    }).catch(e => setError(extractError(e)))
 
     api.checkUpdate().then(info => {
       if (info.hasUpdate && info.latestVersion && info.releaseUrl) {
@@ -128,7 +133,7 @@ export default function App() {
       setPlugins(p)
       setHooks(h)
     } catch (e) {
-      setError(String(e))
+      setError(extractError(e))
     } finally {
       setLoading(false)
     }
@@ -143,7 +148,7 @@ export default function App() {
       else if (tab === 'plugins') setPlugins(await api.getPlugins(wsId))
       else if (tab === 'hooks') setHooks(await api.getHooks(wsId))
     } catch (e) {
-      setError(String(e))
+      setError(extractError(e))
     } finally {
       setLoading(false)
     }
@@ -153,8 +158,22 @@ export default function App() {
     if (selectedId) loadAllData(selectedId)
   }, [selectedId, loadAllData])
 
+  // SSE 实时同步：文件变化时自动刷新当前 Tab
+  useEffect(() => {
+    const es = new EventSource('/api/events')
+    es.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data) as { type: string; workspaceId: string }
+        if (msg.type === 'workspace-changed' && msg.workspaceId === selectedId) {
+          if (selectedId) loadTabData(selectedId, activeTab)
+        }
+      } catch { /* ignore malformed */ }
+    }
+    return () => es.close()
+  }, [selectedId, activeTab, loadTabData])
+
   const refresh = () => {
-    if (selectedId) loadAllData(selectedId)
+    if (selectedId) loadTabData(selectedId, activeTab)
   }
 
   const confirmDelete = (name: string, action: () => Promise<unknown>) => {
