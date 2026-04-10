@@ -220,18 +220,22 @@ export default function App() {
               {activeTab === 'skills' && (
                 skills.length === 0
                   ? <EmptyState icon="⚡" title="No skills found" desc="No skills installed in this workspace" />
-                  : skills.map(skill => (
-                    <ItemCard
-                      key={skill.path}
-                      name={skill.name}
-                      description={skill.description || skill.path}
-                      badge={skill.isSymlink ? 'symlink' : skill.scope}
-                      badgeColor={skill.isSymlink ? 'yellow' : skill.scope === 'global' ? 'blue' : 'green'}
-                      onDelete={() => confirmDelete(skill.name, () =>
-                        api.deleteSkill(selectedId!, skill.name, skill.scope)
-                      )}
-                    />
-                  ))
+                  : skills.map(skill => {
+                    // 项目工作空间内不允许删除全局 skill
+                    const canDelete = selectedId === 'global' || skill.scope === 'project'
+                    return (
+                      <ItemCard
+                        key={skill.path}
+                        name={skill.name}
+                        description={skill.description || skill.path}
+                        badge={skill.isSymlink ? 'symlink' : skill.scope}
+                        badgeColor={skill.isSymlink ? 'yellow' : skill.scope === 'global' ? 'blue' : 'green'}
+                        onDelete={canDelete ? () => confirmDelete(skill.name, () =>
+                          api.deleteSkill(selectedId!, skill.name, skill.scope)
+                        ) : undefined}
+                      />
+                    )
+                  })
               )}
 
               {/* MCPs */}
