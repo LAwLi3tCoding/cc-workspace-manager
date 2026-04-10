@@ -96,12 +96,21 @@ export default function App() {
   const [hooks, setHooks] = useState<HookFile[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [updateBanner, setUpdateBanner] = useState<{
+    latestVersion: string; releaseUrl: string
+  } | null>(null)
 
   useEffect(() => {
     api.getWorkspaces().then(ws => {
       setWorkspaces(ws)
       if (ws.length > 0) setSelectedId(ws[0].id)
     }).catch(e => setError(String(e)))
+
+    api.checkUpdate().then(info => {
+      if (info.hasUpdate && info.latestVersion && info.releaseUrl) {
+        setUpdateBanner({ latestVersion: info.latestVersion, releaseUrl: info.releaseUrl })
+      }
+    }).catch(() => { /* ignore */ })
   }, [])
 
   const loadAllData = useCallback(async (wsId: string) => {
@@ -167,6 +176,24 @@ export default function App() {
       />
 
       <main className="flex-1 flex flex-col min-w-0 bg-slate-50">
+        {/* Update banner */}
+        {updateBanner && (
+          <div className="flex items-center justify-between px-6 py-2 bg-blue-50 border-b border-blue-200 text-xs text-blue-700">
+            <span>
+              🎉 新版本可用：<strong>v{updateBanner.latestVersion}</strong>，运行以下命令更新：
+              <code className="mx-2 px-1.5 py-0.5 bg-blue-100 rounded font-mono">
+                curl -fsSL https://raw.githubusercontent.com/LAwLi3tCoding/cc-workspace-manager/master/install.sh | bash
+              </code>
+            </span>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <a href={updateBanner.releaseUrl} target="_blank" rel="noreferrer"
+                className="underline hover:text-blue-900">查看更新内容</a>
+              <button onClick={() => setUpdateBanner(null)}
+                className="text-blue-400 hover:text-blue-700">✕</button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <header className="flex items-center justify-between px-6 py-3.5 bg-white border-b border-slate-200">
           <div>

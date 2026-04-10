@@ -60,4 +60,11 @@ export const api = {
     request<{ ok: boolean }>(`/workspaces/${workspaceId}/hooks/${encodeURIComponent(filename)}?scope=${scope}`, {
       method: 'DELETE',
     }),
+
+  checkUpdate: () => request<{
+    hasUpdate: boolean
+    currentVersion: string
+    latestVersion: string | null
+    releaseUrl: string | null
+  }>('/update-check'),
 }
