@@ -23,7 +23,7 @@ router.get('/:workspaceId/mcps', (req, res) => {
   }
 })
 
-router.post('/:workspaceId/mcps', (req, res) => {
+router.post('/:workspaceId/mcps', async (req, res) => {
   try {
     const resolved = resolveWorkspace(req.params.workspaceId)
     if (!resolved) return res.status(404).json({ error: 'Workspace not found' })
@@ -40,7 +40,7 @@ router.post('/:workspaceId/mcps', (req, res) => {
     const config = type === 'stdio'
       ? { type: 'stdio' as const, command: command!, args, env }
       : { type: 'sse' as const, url: url!, env }
-    mgr.create(name, config, resolved.scope, resolved.basePath)
+    await mgr.create(name, config, resolved.scope, resolved.basePath)
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ error: String(err) })
@@ -52,6 +52,10 @@ router.patch('/:workspaceId/mcps/:serverName', async (req, res) => {
     const resolved = resolveWorkspace(req.params.workspaceId)
     if (!resolved) return res.status(404).json({ error: 'Workspace not found' })
     const { serverName } = req.params
+    const FORBIDDEN_NAMES = ['__proto__', 'constructor', 'prototype']
+    if (FORBIDDEN_NAMES.includes(serverName)) {
+      return res.status(400).json({ error: 'Invalid server name' })
+    }
     const { enabled } = req.body as { enabled: boolean }
     if (typeof enabled !== 'boolean') return res.status(400).json({ error: '`enabled` must be boolean' })
     const mgr = new McpManager(HOME)
@@ -62,13 +66,17 @@ router.patch('/:workspaceId/mcps/:serverName', async (req, res) => {
   }
 })
 
-router.delete('/:workspaceId/mcps/:serverName', (req, res) => {
+router.delete('/:workspaceId/mcps/:serverName', async (req, res) => {
   try {
     const resolved = resolveWorkspace(req.params.workspaceId)
     if (!resolved) return res.status(404).json({ error: 'Workspace not found' })
     const { serverName } = req.params
+    const FORBIDDEN_NAMES = ['__proto__', 'constructor', 'prototype']
+    if (FORBIDDEN_NAMES.includes(serverName)) {
+      return res.status(400).json({ error: 'Invalid server name' })
+    }
     const mgr = new McpManager(HOME)
-    mgr.delete(serverName, resolved.scope, resolved.basePath)
+    await mgr.delete(serverName, resolved.scope, resolved.basePath)
     res.json({ ok: true })
   } catch (err) {
     const msg = String(err)

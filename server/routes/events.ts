@@ -8,6 +8,7 @@ let watcher: FileWatcher | null = null
 const clients = new Set<Response>()
 
 export function initFileWatcher(): void {
+  if (watcher) { watcher.stop(); watcher = null }
   watcher = new FileWatcher(HOME)
   watcher.onChange((workspaceId) => {
     const data = JSON.stringify({ type: 'workspace-changed', workspaceId })

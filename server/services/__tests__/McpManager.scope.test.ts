@@ -36,10 +36,10 @@ describe('McpManager scope routing', () => {
     expect(servers.map(s => s.name)).not.toContain('globalServer')
   })
 
-  it('create adds server to correct scope file', () => {
+  it('create adds server to correct scope file', async () => {
     const mgr = new McpManager(tmpDir)
     const projDir = path.join(tmpDir, 'myproject')
-    mgr.create('newServer', { type: 'stdio', command: 'echo', args: ['hello'] }, 'project', projDir)
+    await mgr.create('newServer', { type: 'stdio', command: 'echo', args: ['hello'] }, 'project', projDir)
     const content = JSON.parse(fs.readFileSync(path.join(projDir, '.mcp.json'), 'utf-8'))
     expect(content.mcpServers.newServer).toBeDefined()
     expect(content.mcpServers.newServer.command).toBe('echo')

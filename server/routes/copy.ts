@@ -31,7 +31,7 @@ router.post('/', (req, res) => {
       return res.status(400).json({ error: 'Invalid MCP server name' })
     }
 
-    const scanner = new WorkspaceScanner()
+    const scanner = new WorkspaceScanner(HOME)
     const workspaces = scanner.scan()
 
     const src = resolveWs(sourceWorkspaceId, workspaces)

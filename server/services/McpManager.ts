@@ -48,7 +48,7 @@ export class McpManager {
     }
   }
 
-  delete(serverName: string, scope: 'global' | 'project' = 'global', basePath?: string): void {
+  async delete(serverName: string, scope: 'global' | 'project' = 'global', basePath?: string): Promise<void> {
     const mcpPath = scope === 'project' && basePath
       ? path.join(basePath, '.mcp.json')
       : path.join(this.homeDir, '.claude', '.mcp.json')
@@ -58,16 +58,16 @@ export class McpManager {
       throw new Error(`MCP server '${serverName}' not found`)
     }
     const { [serverName]: _removed, ...rest } = existing
-    this.writer.patchJson(mcpPath, { mcpServers: rest })
+    await this.writer.patchJsonAsync(mcpPath, { mcpServers: rest })
   }
 
-  create(
+  async create(
     serverName: string,
     config: { type: 'stdio'; command: string; args?: string[]; env?: Record<string, string> }
            | { type: 'sse'; url: string; env?: Record<string, string> },
     scope: 'global' | 'project' = 'global',
     basePath?: string
-  ): void {
+  ): Promise<void> {
     const mcpPath = scope === 'project' && basePath
       ? path.join(basePath, '.mcp.json')
       : path.join(this.homeDir, '.claude', '.mcp.json')
@@ -77,6 +77,6 @@ export class McpManager {
       : { url: config.url, env: config.env }
 
     const existing = this.reader.readMcpServers(scope, basePath ?? this.homeDir)
-    this.writer.patchJson(mcpPath, { mcpServers: { ...existing, [serverName]: entry } })
+    await this.writer.patchJsonAsync(mcpPath, { mcpServers: { ...existing, [serverName]: entry } })
   }
 }
