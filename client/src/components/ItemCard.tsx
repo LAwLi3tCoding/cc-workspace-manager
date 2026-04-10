@@ -15,6 +15,7 @@ interface Props {
   badges?: BadgeItem[]
   onToggle?: (enabled: boolean) => void
   onDelete?: () => void
+  onCopy?: () => void
   deleteDisabledReason?: string
   disabled?: boolean
   disabledReason?: string
@@ -32,7 +33,7 @@ const badgeColors = {
 
 export function ItemCard({
   name, description, effective, badge, badgeColor = 'yellow', badges,
-  onToggle, onDelete, deleteDisabledReason, disabled, disabledReason, extra,
+  onToggle, onDelete, onCopy, deleteDisabledReason, disabled, disabledReason, extra,
   symlinkTarget, symlinkBroken,
 }: Props) {
   const allBadges: BadgeItem[] = badges ?? (badge ? [{ label: badge, color: badgeColor }] : [])
@@ -90,6 +91,18 @@ export function ItemCard({
           >
             <div className="toggle-thumb" />
           </div>
+        )}
+        {onCopy && (
+          <button
+            onClick={onCopy}
+            className="p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 transition-colors rounded-lg"
+            title="复制到..."
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
         )}
         {onDelete ? (
           <button

@@ -393,6 +393,61 @@ export default function App() {
       .catch(e => setError(extractError(e)))
   }
 
+  const handleExport = async (workspaceId: string) => {
+    try {
+      const data = await api.exportConfig(workspaceId)
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${data.workspace}-config.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(extractError(e))
+    }
+  }
+
+  const handleImport = (workspaceId: string) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      try {
+        const text = await file.text()
+        const data = JSON.parse(text)
+        const result = await api.importConfig(workspaceId, { mcps: data.mcps ?? [] })
+        alert(`导入成功：${result.imported} 个 MCP 服务器`)
+        if (workspaceId === selectedId) loadTabData(workspaceId, 'mcps')
+      } catch (e) {
+        setError(extractError(e))
+      }
+    }
+    input.click()
+  }
+
+  const handleCopyMcp = async (serverName: string, sourceWorkspaceId: string) => {
+    if (!workspaces.length) return
+    const options = workspaces.filter(w => w.id !== sourceWorkspaceId)
+    const targetName = window.prompt(
+      `将 "${serverName}" 复制到哪个工作空间？\n\n可选：\n${options.map((n, i) => `${i + 1}. ${n.name}`).join('\n')}\n\n请输入序号或名称：`
+    )
+    if (!targetName) return
+    const idx = parseInt(targetName) - 1
+    const targetWs = isNaN(idx)
+      ? workspaces.find(w => w.name === targetName && w.id !== sourceWorkspaceId)
+      : options[idx]
+    if (!targetWs) { setError('未找到目标工作空间'); return }
+    try {
+      await api.copyItem({ type: 'mcp', itemName: serverName, sourceWorkspaceId, targetWorkspaceId: targetWs.id })
+      alert(`已复制到 ${targetWs.name}`)
+    } catch (e) {
+      setError(extractError(e))
+    }
+  }
+
   const selectedWs = workspaces.find(w => w.id === selectedId)
 
   return (
@@ -402,6 +457,8 @@ export default function App() {
         selected={selectedId}
         onSelect={id => { setSelectedId(id); setActiveTab('skills') }}
         loading={workspaces.length === 0}
+        onExport={handleExport}
+        onImport={handleImport}
       />
 
       <main className="flex-1 flex flex-col min-w-0 bg-slate-50">
@@ -533,6 +590,7 @@ export default function App() {
                           .then(() => loadTabData(selectedId!, 'mcps'))
                           .catch(e => setError(extractError(e)))
                       }
+                      onCopy={() => handleCopyMcp(mcp.name, selectedId!)}
                       onDelete={() => confirmDelete(mcp.name, () =>
                         api.deleteMcp(selectedId!, mcp.name)
                       )}

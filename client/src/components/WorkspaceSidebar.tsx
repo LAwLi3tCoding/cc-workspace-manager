@@ -6,6 +6,8 @@ interface Props {
   selected: string | null
   onSelect: (id: string) => void
   loading: boolean
+  onExport: (id: string) => void
+  onImport: (id: string) => void
 }
 
 const ICON_COLORS = ['bg-violet-500/20 text-violet-400', 'bg-emerald-500/20 text-emerald-400',
@@ -29,8 +31,9 @@ function WorkspaceIcon({ isGlobal, name }: { isGlobal: boolean; name: string }) 
   )
 }
 
-export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Props) {
+export function WorkspaceSidebar({ workspaces, selected, onSelect, loading, onExport, onImport }: Props) {
   const [query, setQuery] = useState('')
+  const [menuOpen, setMenuOpen] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const lowerQuery = query.trim().toLowerCase()
@@ -77,27 +80,48 @@ export function WorkspaceSidebar({ workspaces, selected, onSelect, loading }: Pr
           <p className="px-4 py-3 text-xs text-slate-500">未找到匹配的工作空间</p>
         )}
         {filtered.map(ws => (
-          <button
-            key={ws.id}
-            onClick={() => onSelect(ws.id)}
-            className={`ws-item w-full text-left px-3 py-2 flex items-center gap-2.5 ${
-              selected === ws.id ? 'active' : ''
-            }`}
-          >
-            <WorkspaceIcon isGlobal={ws.isGlobal} name={ws.name} />
-            <div className="min-w-0">
-              <div className={`text-xs font-medium truncate ${
-                selected === ws.id ? 'text-slate-100' : 'text-slate-400'
-              }`}>
-                {ws.name}
+          <div key={ws.id} className="relative flex items-center group">
+            <button
+              onClick={() => onSelect(ws.id)}
+              className={`ws-item flex-1 text-left px-3 py-2 flex items-center gap-2.5 ${
+                selected === ws.id ? 'active' : ''
+              }`}
+            >
+              <WorkspaceIcon isGlobal={ws.isGlobal} name={ws.name} />
+              <div className="min-w-0">
+                <div className={`text-xs font-medium truncate ${
+                  selected === ws.id ? 'text-slate-100' : 'text-slate-400'
+                }`}>
+                  {ws.name}
+                </div>
+                {ws.isGlobal && (
+                  <div className="text-[10px] font-mono" style={{ color: 'var(--sidebar-text)' }}>
+                    global
+                  </div>
+                )}
               </div>
-              {ws.isGlobal && (
-                <div className="text-[10px] font-mono" style={{ color: 'var(--sidebar-text)' }}>
-                  global
+            </button>
+            {/* ⋮ 菜单 */}
+            <div className="relative flex-shrink-0 pr-1">
+              <button
+                onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === ws.id ? null : ws.id) }}
+                className="p-1 text-slate-600 hover:text-slate-300 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                title="更多操作"
+              >⋮</button>
+              {menuOpen === ws.id && (
+                <div className="absolute right-0 top-6 z-20 bg-slate-800 border border-slate-700 rounded-lg shadow-lg text-xs w-32">
+                  <button
+                    onClick={() => { onExport(ws.id); setMenuOpen(null) }}
+                    className="w-full text-left px-3 py-2 hover:bg-slate-700 text-slate-300 rounded-t-lg"
+                  >导出配置</button>
+                  <button
+                    onClick={() => { onImport(ws.id); setMenuOpen(null) }}
+                    className="w-full text-left px-3 py-2 hover:bg-slate-700 text-slate-300 rounded-b-lg"
+                  >从 JSON 导入</button>
                 </div>
               )}
             </div>
-          </button>
+          </div>
         ))}
       </div>
 

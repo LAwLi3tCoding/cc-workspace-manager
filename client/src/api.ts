@@ -86,6 +86,28 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  copyItem: (data: {
+    type: 'mcp' | 'plugin'
+    itemName: string
+    sourceWorkspaceId: string
+    targetWorkspaceId: string
+  }) =>
+    request<{ ok: boolean }>('/copy', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  exportConfig: (workspaceId: string) =>
+    request<{ workspace: string; exportedAt: string; mcps: unknown[] }>(
+      `/workspaces/${workspaceId}/export`
+    ),
+
+  importConfig: (workspaceId: string, data: { mcps: unknown[] }) =>
+    request<{ ok: boolean; imported: number }>(`/workspaces/${workspaceId}/import`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   checkUpdate: () => request<{
     hasUpdate: boolean
     currentVersion: string

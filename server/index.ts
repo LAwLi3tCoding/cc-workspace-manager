@@ -9,6 +9,7 @@ import mcpsRouter from './routes/mcps'
 import pluginsRouter from './routes/plugins'
 import hooksRouter from './routes/hooks'
 import eventsRouter, { initFileWatcher } from './routes/events'
+import copyRouter from './routes/copy'
 
 const app = express()
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 47890
@@ -79,6 +80,7 @@ app.use('/api/workspaces', mcpsRouter)
 app.use('/api/workspaces', pluginsRouter)
 app.use('/api/workspaces', hooksRouter)
 app.use('/api/events', eventsRouter)
+app.use('/api/copy', copyRouter)
 
 // 启动文件监听（生产和开发模式均启动）
 initFileWatcher()
