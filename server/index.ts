@@ -22,7 +22,7 @@ app.use('/api/workspaces', pluginsRouter)
 app.use('/api/workspaces', hooksRouter)
 
 // Serve 前端静态文件（生产模式）
-const distDir = path.join(__dirname, '..', 'dist', 'client')
+const distDir = path.join(__dirname, '..', 'client')
 if (fs.existsSync(distDir)) {
   app.use(express.static(distDir))
   // SPA fallback：所有非 /api 路由都返回 index.html
