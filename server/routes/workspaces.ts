@@ -8,7 +8,7 @@ const HOME = process.env.HOME!
 
 router.get('/', (_req, res) => {
   try {
-    const workspaces = scanner.scan()
+    const workspaces = scanner.scan().filter(w => w.exists)
     res.json(workspaces)
   } catch (err) {
     res.status(500).json({ error: String(err) })
