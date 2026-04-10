@@ -8,7 +8,7 @@ warn()  { echo -e "${YELLOW}[!]${NC} $*"; }
 error() { echo -e "${RED}[✗]${NC} $*"; exit 1; }
 
 # ─── 配置 ────────────────────────────────────────────────────────────────────
-GITHUB_REPO="LAwLi3t-CN/cc-workspace-manager"
+GITHUB_REPO="LAwLi3tCoding/cc-workspace-manager"
 RELEASE_TAG="${CC_VERSION:-latest}"           # 可用环境变量覆盖版本
 INSTALL_DIR="$HOME/cc-workspace-manager"
 PLIST_LABEL="com.ccworkspace.manager"

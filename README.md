@@ -7,12 +7,12 @@
 ### 方式一：一键安装（推荐）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/LAwLi3t-CN/cc-workspace-manager/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/LAwLi3tCoding/cc-workspace-manager/master/install.sh | bash
 ```
 
 ### 方式二：下载安装包
 
-1. 前往 [Releases](https://github.com/LAwLi3t-CN/cc-workspace-manager/releases) 下载最新的 `cc-workspace-manager-release.tar.gz`
+1. 前往 [Releases](https://github.com/LAwLi3tCoding/cc-workspace-manager/releases) 下载最新的 `cc-workspace-manager-release.tar.gz`
 2. 解压并运行安装脚本：
 
 ```bash
@@ -94,7 +94,7 @@ tail -f ~/cc-workspace-manager/.omc/logs/server.error.log
 ### 更新到新版本
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/LAwLi3t-CN/cc-workspace-manager/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/LAwLi3tCoding/cc-workspace-manager/master/install.sh | bash
 ```
 
 重新运行安装脚本即可，会自动停止旧服务、安装新版本并重启。
