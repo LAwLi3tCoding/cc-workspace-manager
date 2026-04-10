@@ -1,6 +1,6 @@
 {
   "name": "cc-workspace-manager",
-  "version": "1.3.2",
+  "version": "1.5.0",
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "nodemon --watch server --ext ts --exec ts-node server/index.ts",
