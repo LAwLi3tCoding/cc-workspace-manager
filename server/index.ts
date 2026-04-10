@@ -16,7 +16,11 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 47890
 const GITHUB_REPO = 'LAwLi3tCoding/cc-workspace-manager'
 
 // ── 版本检查 ──────────────────────────────────────────────────────────────────
-const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'package.json'), 'utf-8'))
+// ts-node: __dirname = server/, dist: __dirname = dist/server/
+const pkgPath = fs.existsSync(path.join(__dirname, '..', 'package.json'))
+  ? path.join(__dirname, '..', 'package.json')
+  : path.join(__dirname, '..', '..', 'package.json')
+const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
 const CURRENT_VERSION: string = pkg.version
 
 interface UpdateInfo {
