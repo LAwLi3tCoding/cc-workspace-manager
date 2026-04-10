@@ -180,7 +180,7 @@ export default function App() {
     if (!confirm(`确认删除 "${name}"？此操作不可撤销。`)) return
     action()
       .then(() => selectedId && loadTabData(selectedId, activeTab))
-      .catch(e => setError(String(e)))
+      .catch(e => setError(extractError(e)))
   }
 
   const selectedWs = workspaces.find(w => w.id === selectedId)
@@ -303,7 +303,7 @@ export default function App() {
                       onToggle={enabled =>
                         api.setMcpEnabled(selectedId!, mcp.name, enabled)
                           .then(() => loadTabData(selectedId!, 'mcps'))
-                          .catch(e => setError(String(e)))
+                          .catch(e => setError(extractError(e)))
                       }
                       onDelete={() => confirmDelete(mcp.name, () =>
                         api.deleteMcp(selectedId!, mcp.name)
@@ -327,7 +327,7 @@ export default function App() {
                       onToggle={enabled =>
                         api.setPluginEnabled(selectedId!, plugin.key, enabled)
                           .then(() => loadTabData(selectedId!, 'plugins'))
-                          .catch(e => setError(String(e)))
+                          .catch(e => setError(extractError(e)))
                       }
                       onDelete={() => confirmDelete(plugin.key, () =>
                         api.deletePlugin(selectedId!, plugin.key)
