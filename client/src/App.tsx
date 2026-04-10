@@ -228,8 +228,12 @@ export default function App() {
                         key={skill.path}
                         name={skill.name}
                         description={skill.description || skill.path}
-                        badge={skill.isSymlink ? 'symlink' : skill.scope}
-                        badgeColor={skill.isSymlink ? 'yellow' : skill.scope === 'global' ? 'blue' : 'green'}
+                        badges={[
+                          skill.scope === 'global'
+                            ? { label: 'global', color: 'blue' as const }
+                            : { label: 'project', color: 'green' as const },
+                          ...(skill.isSymlink ? [{ label: 'symlink', color: 'yellow' as const }] : []),
+                        ]}
                         onDelete={canDelete ? () => confirmDelete(skill.name, () =>
                           api.deleteSkill(selectedId!, skill.name, skill.scope)
                         ) : undefined}

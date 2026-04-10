@@ -1,12 +1,18 @@
 import type { EffectiveState } from '../../../server/types'
 import { ScopeLabel } from './ScopeLabel'
 
+interface BadgeItem {
+  label: string
+  color: 'yellow' | 'blue' | 'red' | 'green'
+}
+
 interface Props {
   name: string
   description?: string
   effective?: EffectiveState
   badge?: string
   badgeColor?: 'yellow' | 'blue' | 'red' | 'green'
+  badges?: BadgeItem[]
   onToggle?: (enabled: boolean) => void
   onDelete?: () => void
   deleteDisabledReason?: string
@@ -23,9 +29,10 @@ const badgeColors = {
 }
 
 export function ItemCard({
-  name, description, effective, badge, badgeColor = 'yellow',
+  name, description, effective, badge, badgeColor = 'yellow', badges,
   onToggle, onDelete, deleteDisabledReason, disabled, disabledReason, extra,
 }: Props) {
+  const allBadges: BadgeItem[] = badges ?? (badge ? [{ label: badge, color: badgeColor }] : [])
   return (
     <div className="item-card flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
       {/* Status indicator strip */}
@@ -38,11 +45,11 @@ export function ItemCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-mono text-sm font-semibold text-slate-800 truncate">{name}</span>
-          {badge && (
-            <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-full ${badgeColors[badgeColor]}`}>
-              {badge}
+          {allBadges.map(b => (
+            <span key={b.label} className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-full ${badgeColors[b.color]}`}>
+              {b.label}
             </span>
-          )}
+          ))}
         </div>
         {description && (
           <p className="text-xs text-slate-500 mt-0.5 font-mono truncate">{description}</p>
